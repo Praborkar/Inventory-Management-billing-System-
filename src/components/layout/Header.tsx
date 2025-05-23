@@ -41,7 +41,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-white shadow-sm px-4 md:px-6">
       <div className="flex items-center gap-2 lg:hidden">
         <SidebarTrigger />
       </div>
@@ -68,7 +68,7 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
                   <span className="hidden md:inline-block">{user?.name}</span>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-white">
                     {user?.name.charAt(0)}
                   </div>
                 </Button>

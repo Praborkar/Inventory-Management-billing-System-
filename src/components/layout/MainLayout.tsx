@@ -22,7 +22,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   // Show loading state
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-[#faf7f2]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
@@ -40,7 +40,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-[#faf7f2]">
         <AppSidebar />
         <div className="flex flex-col flex-1">
           <Header />

@@ -1,11 +1,10 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 36 33% 97%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -14,10 +13,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 221 83% 53%;
+    --primary: 0 72% 51%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 221 83% 53%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -31,7 +30,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
+    --ring: 0 72% 51%;
 
     --radius: 0.5rem;
 
@@ -133,4 +132,35 @@
 
 .data-table-cell {
   @apply px-6 py-4;
+}
+
+/* Logo animation */
+@keyframes logo-hover {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.logo-hover:hover {
+  animation: logo-hover 0.5s ease-in-out;
+}
+
+/* Form input styles */
+.form-input-zoho {
+  @apply w-full px-4 py-3 rounded-md border border-gray-200 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all;
+}
+
+/* Button styles */
+.btn-zoho-primary {
+  @apply bg-primary text-white px-4 py-3 rounded-md hover:bg-primary/90 transition-all w-full font-medium;
+}
+
+.btn-zoho-secondary {
+  @apply bg-secondary text-white px-4 py-3 rounded-md hover:bg-secondary/90 transition-all font-medium;
 }
