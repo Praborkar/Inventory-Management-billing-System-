@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useInventory, Product } from "@/contexts/InventoryContext";
+import { formatIndianRupees } from "@/contexts/InvoiceContext";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -90,9 +91,10 @@ const ProductTable = () => {
             <TableRow>
               <TableHead>Product Name</TableHead>
               <TableHead>SKU</TableHead>
-              <TableHead>Price</TableHead>
+              <TableHead>MRP</TableHead>
+              <TableHead>Selling Price</TableHead>
               <TableHead>Quantity</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead>GST</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -109,16 +111,17 @@ const ProductTable = () => {
                     </Link>
                   </TableCell>
                   <TableCell>{product.sku}</TableCell>
-                  <TableCell>${product.price.toFixed(2)}</TableCell>
+                  <TableCell>{formatIndianRupees(product.mrp)}</TableCell>
+                  <TableCell>{formatIndianRupees(product.sellingPrice)}</TableCell>
                   <TableCell>
                     <div className="flex items-center">
-                      {product.quantity}
+                      {product.quantity} {product.unit}
                       {product.quantity <= product.lowStockThreshold && (
                         <Badge variant="destructive" className="ml-2 text-xs">Low Stock</Badge>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{product.category}</TableCell>
+                  <TableCell>{product.gstRate}%</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button 
@@ -153,7 +156,7 @@ const ProductTable = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">
+                <TableCell colSpan={7} className="text-center py-4">
                   No products found
                 </TableCell>
               </TableRow>

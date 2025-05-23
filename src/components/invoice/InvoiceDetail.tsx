@@ -19,8 +19,9 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { useInvoices } from "@/contexts/InvoiceContext";
+import { useInvoices, formatIndianRupees } from "@/contexts/InvoiceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { IndianRupee } from "lucide-react";
 
 interface InvoiceDetailProps {
   invoiceId: string;
@@ -47,7 +48,7 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    return new Date(dateString).toLocaleString('en-IN');
   };
 
   const getStatusBadge = (status: string) => {
@@ -60,6 +61,16 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
         return <Badge className="bg-red-500 hover:bg-red-600">Cancelled</Badge>;
       default:
         return <Badge>{status}</Badge>;
+    }
+  };
+  
+  const getPaymentMode = (mode: string) => {
+    switch (mode) {
+      case 'cash': return 'Cash';
+      case 'upi': return 'UPI';
+      case 'card': return 'Card';
+      case 'netbanking': return 'Net Banking';
+      default: return mode;
     }
   };
   
@@ -79,7 +90,7 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Invoice #{invoice.id}</h2>
+          <h2 className="text-2xl font-bold">Invoice {invoice.invoiceNumber}</h2>
           <p className="text-gray-500">Created on {formatDate(invoice.createdAt)}</p>
         </div>
         
@@ -107,11 +118,15 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-semibold text-lg mb-4">Customer Information</h3>
+                <h3 className="font-semibold text-lg mb-4">Buyer Information</h3>
                 <div className="space-y-2">
                   <div>
                     <span className="text-sm font-medium text-gray-500">Name:</span>
                     <p>{invoice.customerName}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Mobile:</span>
+                    <p>{invoice.customerMobile || 'Not provided'}</p>
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-500">Email:</span>
@@ -130,6 +145,11 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium text-gray-500">Current Status:</span>
                     {getStatusBadge(invoice.status)}
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-gray-500">Payment Mode:</span>
+                    <p>{getPaymentMode(invoice.paymentMode)}</p>
                   </div>
                   
                   {user?.role === 'admin' && (
@@ -158,8 +178,10 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Product</TableHead>
+                      <TableHead>HSN</TableHead>
                       <TableHead className="text-right">Price</TableHead>
                       <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead className="text-right">GST</TableHead>
                       <TableHead className="text-right">Total</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -167,9 +189,11 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
                     {invoice.items.map((item, index) => (
                       <TableRow key={index}>
                         <TableCell>{item.productName}</TableCell>
-                        <TableCell className="text-right">${item.unitPrice.toFixed(2)}</TableCell>
+                        <TableCell>{item.hsn}</TableCell>
+                        <TableCell className="text-right">{formatIndianRupees(item.unitPrice)}</TableCell>
                         <TableCell className="text-right">{item.quantity}</TableCell>
-                        <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{item.gstRate}%</TableCell>
+                        <TableCell className="text-right">{formatIndianRupees(item.total)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -195,21 +219,25 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>${invoice.subtotal.toFixed(2)}</span>
+                  <span>{formatIndianRupees(invoice.subtotal)}</span>
                 </div>
                 {invoice.discountPercent > 0 && (
                   <div className="flex justify-between">
                     <span>Discount ({invoice.discountPercent}%):</span>
-                    <span>-${invoice.discountAmount.toFixed(2)}</span>
+                    <span>-{formatIndianRupees(invoice.discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Tax (8.5%):</span>
-                  <span>${invoice.tax.toFixed(2)}</span>
+                  <span>CGST:</span>
+                  <span>{formatIndianRupees(invoice.cgst)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>SGST:</span>
+                  <span>{formatIndianRupees(invoice.sgst)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg pt-2 border-t">
                   <span>Total:</span>
-                  <span>${invoice.total.toFixed(2)}</span>
+                  <span>{formatIndianRupees(invoice.total)}</span>
                 </div>
               </div>
               
@@ -234,7 +262,7 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoiceId }) => {
                   <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                 </svg>
-                Copy Link
+                Share Invoice
               </Button>
             </div>
           </CardContent>

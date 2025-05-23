@@ -32,6 +32,24 @@ const categories = [
   "Storage"
 ];
 
+const units = [
+  "Pcs",
+  "Box",
+  "Kg",
+  "Ltr",
+  "Mtr",
+  "Pack",
+  "Set"
+];
+
+const gstRates = [
+  {value: 0, label: "0% (Exempt)"},
+  {value: 5, label: "5% GST"},
+  {value: 12, label: "12% GST"},
+  {value: 18, label: "18% GST"},
+  {value: 28, label: "28% GST"}
+];
+
 const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }) => {
   const { addProduct, updateProduct, getProduct } = useInventory();
   const navigate = useNavigate();
@@ -41,11 +59,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
   const [formData, setFormData] = useState<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>({
     name: existingProduct?.name || "",
     sku: existingProduct?.sku || "",
-    price: existingProduct?.price || 0,
+    hsn: existingProduct?.hsn || "",
+    mrp: existingProduct?.mrp || 0,
+    sellingPrice: existingProduct?.sellingPrice || 0,
+    purchasePrice: existingProduct?.purchasePrice || 0,
     quantity: existingProduct?.quantity || 0,
+    unit: existingProduct?.unit || "Pcs",
     category: existingProduct?.category || "Electronics",
     description: existingProduct?.description || "",
     lowStockThreshold: existingProduct?.lowStockThreshold || 5,
+    gstRate: existingProduct?.gstRate || 18,
     image: existingProduct?.image || ""
   });
   
@@ -82,12 +105,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
     }
   };
   
-  const handleCategoryChange = (value: string) => {
-    setFormData(prev => ({ ...prev, category: value }));
-    if (errors.category) {
+  const handleSelectChange = (name: string, value: string | number) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
-        delete newErrors.category;
+        delete newErrors[name];
         return newErrors;
       });
     }
@@ -104,8 +127,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
       newErrors.sku = "SKU is required";
     }
     
-    if (formData.price <= 0) {
-      newErrors.price = "Price must be greater than zero";
+    if (!formData.hsn.trim()) {
+      newErrors.hsn = "HSN code is required";
+    }
+    
+    if (formData.mrp <= 0) {
+      newErrors.mrp = "MRP must be greater than zero";
+    }
+    
+    if (formData.sellingPrice <= 0) {
+      newErrors.sellingPrice = "Selling price must be greater than zero";
+    }
+    
+    if (formData.purchasePrice <= 0) {
+      newErrors.purchasePrice = "Purchase price must be greater than zero";
     }
     
     if (formData.quantity < 0) {
@@ -114,6 +149,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
     
     if (!formData.category) {
       newErrors.category = "Category is required";
+    }
+    
+    if (!formData.unit) {
+      newErrors.unit = "Unit is required";
     }
     
     if (formData.lowStockThreshold < 0) {
@@ -138,6 +177,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
       addProduct(formData);
       navigate('/inventory');
     }
+  };
+  
+  // Format currency input
+  const formatIndianRupees = (amount: number): string => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 2
+    }).format(amount);
   };
   
   return (
@@ -170,19 +218,64 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="price">Price ($)</Label>
+          <Label htmlFor="hsn">HSN Code</Label>
           <Input
-            id="price"
-            name="price"
+            id="hsn"
+            name="hsn"
+            value={formData.hsn}
+            onChange={handleChange}
+            placeholder="Enter HSN code"
+            className={errors.hsn ? "border-red-500" : ""}
+          />
+          {errors.hsn && <p className="text-sm text-red-500">{errors.hsn}</p>}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="mrp">MRP (₹)</Label>
+          <Input
+            id="mrp"
+            name="mrp"
             type="number"
             step="0.01"
             min="0"
-            value={formData.price}
+            value={formData.mrp}
             onChange={handleNumberChange}
-            placeholder="Enter product price"
-            className={errors.price ? "border-red-500" : ""}
+            placeholder="Enter MRP"
+            className={errors.mrp ? "border-red-500" : ""}
           />
-          {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+          {errors.mrp && <p className="text-sm text-red-500">{errors.mrp}</p>}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="sellingPrice">Selling Price (₹)</Label>
+          <Input
+            id="sellingPrice"
+            name="sellingPrice"
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.sellingPrice}
+            onChange={handleNumberChange}
+            placeholder="Enter selling price"
+            className={errors.sellingPrice ? "border-red-500" : ""}
+          />
+          {errors.sellingPrice && <p className="text-sm text-red-500">{errors.sellingPrice}</p>}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="purchasePrice">Purchase Price (₹)</Label>
+          <Input
+            id="purchasePrice"
+            name="purchasePrice"
+            type="number"
+            step="0.01"
+            min="0"
+            value={formData.purchasePrice}
+            onChange={handleNumberChange}
+            placeholder="Enter purchase price"
+            className={errors.purchasePrice ? "border-red-500" : ""}
+          />
+          {errors.purchasePrice && <p className="text-sm text-red-500">{errors.purchasePrice}</p>}
         </div>
         
         <div className="space-y-2">
@@ -202,10 +295,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
         </div>
         
         <div className="space-y-2">
+          <Label htmlFor="unit">Unit</Label>
+          <Select 
+            value={formData.unit} 
+            onValueChange={(value) => handleSelectChange('unit', value)}
+          >
+            <SelectTrigger id="unit" className={errors.unit ? "border-red-500" : ""}>
+              <SelectValue placeholder="Select a unit" />
+            </SelectTrigger>
+            <SelectContent>
+              {units.map(unit => (
+                <SelectItem key={unit} value={unit}>
+                  {unit}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.unit && <p className="text-sm text-red-500">{errors.unit}</p>}
+        </div>
+        
+        <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
           <Select 
             value={formData.category} 
-            onValueChange={handleCategoryChange}
+            onValueChange={(value) => handleSelectChange('category', value)}
           >
             <SelectTrigger id="category" className={errors.category ? "border-red-500" : ""}>
               <SelectValue placeholder="Select a category" />
@@ -219,6 +332,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ editMode = false, productId }
             </SelectContent>
           </Select>
           {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="gstRate">GST Rate</Label>
+          <Select 
+            value={formData.gstRate.toString()} 
+            onValueChange={(value) => handleSelectChange('gstRate', parseInt(value))}
+          >
+            <SelectTrigger id="gstRate">
+              <SelectValue placeholder="Select GST rate" />
+            </SelectTrigger>
+            <SelectContent>
+              {gstRates.map(rate => (
+                <SelectItem key={rate.value} value={rate.value.toString()}>
+                  {rate.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="space-y-2">

@@ -3,7 +3,19 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from "recharts";
 import { useInventory } from "@/contexts/InventoryContext";
-import { useInvoices } from "@/contexts/InvoiceContext";
+import { useInvoices, formatIndianRupees } from "@/contexts/InvoiceContext";
+import { IndianRupee } from "lucide-react";
+
+// Function to format numbers in Indian format (lakhs, crores)
+const formatIndianNumber = (value: number): string => {
+  if (value >= 10000000) { // 1 crore
+    return `${(value / 10000000).toFixed(2)} Cr`;
+  } else if (value >= 100000) { // 1 lakh
+    return `${(value / 100000).toFixed(2)} L`;
+  } else {
+    return value.toLocaleString('en-IN');
+  }
+};
 
 export default function Reports() {
   const { products } = useInventory();
@@ -73,6 +85,11 @@ export default function Reports() {
     }));
   };
   
+  // Format tooltip values in Indian currency
+  const formatTooltipCurrency = (value: any) => {
+    return formatIndianRupees(value);
+  };
+  
   // Colors for pie chart
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF', '#FF6B6B', '#4ECDC4'];
   
@@ -100,10 +117,13 @@ export default function Reports() {
                 <LineChart data={monthlySalesData()} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
-                  <YAxis yAxisId="left" tickFormatter={(value) => `$${value}`} />
+                  <YAxis 
+                    yAxisId="left" 
+                    tickFormatter={(value) => `₹${formatIndianNumber(value)}`}
+                  />
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip formatter={(value, name) => {
-                    return name === 'sales' ? [`$${value}`, 'Sales'] : [value, 'Invoices'];
+                    return name === 'sales' ? [formatIndianRupees(value), 'Sales'] : [value, 'Invoices'];
                   }} />
                   <Legend />
                   <Line 
@@ -177,8 +197,8 @@ export default function Reports() {
                 <BarChart data={salesByCategoryData()} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `$${value}`} />
-                  <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
+                  <YAxis tickFormatter={(value) => `₹${formatIndianNumber(value)}`} />
+                  <Tooltip formatter={(value) => [formatIndianRupees(value), 'Revenue']} />
                   <Bar dataKey="value" fill="#3b82f6" name="Revenue" />
                 </BarChart>
               </ResponsiveContainer>
@@ -204,10 +224,9 @@ export default function Reports() {
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-medium text-gray-500">Total Sales</span>
                 <span className="text-3xl font-bold">
-                  ${invoices
+                  {formatIndianRupees(invoices
                     .filter(i => i.status === 'paid')
-                    .reduce((total, invoice) => total + invoice.total, 0)
-                    .toFixed(2)}
+                    .reduce((total, invoice) => total + invoice.total, 0))}
                 </span>
               </div>
               
@@ -224,13 +243,14 @@ export default function Reports() {
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-medium text-gray-500">Avg Order Value</span>
                 <span className="text-3xl font-bold">
-                  ${invoices.length > 0
-                    ? (invoices
-                        .filter(i => i.status === 'paid')
-                        .reduce((total, invoice) => total + invoice.total, 0) / 
-                        invoices.filter(i => i.status === 'paid').length)
-                        .toFixed(2)
-                    : '0.00'}
+                  {invoices.length > 0
+                    ? formatIndianRupees(
+                        invoices
+                          .filter(i => i.status === 'paid')
+                          .reduce((total, invoice) => total + invoice.total, 0) / 
+                          Math.max(1, invoices.filter(i => i.status === 'paid').length)
+                      )
+                    : '₹0.00'}
                 </span>
               </div>
             </div>

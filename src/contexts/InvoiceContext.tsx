@@ -6,22 +6,29 @@ import { Product } from './InventoryContext';
 export interface InvoiceItem {
   productId: string;
   productName: string;
+  hsn: string;
   quantity: number;
   unitPrice: number;
+  gstRate: number;
+  gstAmount: number;
   total: number;
 }
 
 export interface Invoice {
   id: string;
+  invoiceNumber: string;
   customerName: string;
   customerEmail: string;
+  customerMobile: string;
   items: InvoiceItem[];
   subtotal: number;
   discountPercent: number;
   discountAmount: number;
-  tax: number;
+  cgst: number;
+  sgst: number;
   total: number;
   status: 'paid' | 'pending' | 'cancelled';
+  paymentMode: 'cash' | 'upi' | 'card' | 'netbanking';
   notes?: string;
   createdAt: string;
   createdBy: {
@@ -32,7 +39,7 @@ export interface Invoice {
 
 interface InvoiceContextType {
   invoices: Invoice[];
-  addInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt'>) => void;
+  addInvoice: (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => void;
   updateInvoice: (id: string, invoice: Partial<Invoice>) => void;
   deleteInvoice: (id: string) => void;
   getInvoice: (id: string) => Invoice | undefined;
@@ -40,9 +47,11 @@ interface InvoiceContextType {
   calculateTotals: (items: InvoiceItem[], discountPercent: number) => {
     subtotal: number;
     discountAmount: number;
-    tax: number;
+    cgst: number;
+    sgst: number;
     total: number;
   };
+  formatIndianRupees: (amount: number) => string;
   loading: boolean;
 }
 
@@ -56,34 +65,54 @@ export const useInvoices = () => {
   return context;
 };
 
+// Format number in Indian currency format
+export const formatIndianRupees = (amount: number): string => {
+  const formatter = new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 2
+  });
+  return formatter.format(amount);
+};
+
 // Mock initial invoices
 const initialInvoices: Invoice[] = [
   {
     id: '1',
-    customerName: 'Jane Smith',
-    customerEmail: 'jane@example.com',
+    invoiceNumber: 'INV-001',
+    customerName: 'Raj Sharma',
+    customerEmail: 'raj@example.com',
+    customerMobile: '9876543210',
     items: [
       {
         productId: '1',
         productName: 'Laptop',
+        hsn: '8471',
         quantity: 1,
-        unitPrice: 999.99,
-        total: 999.99
+        unitPrice: 45999.99,
+        gstRate: 18,
+        gstAmount: 8280.00,
+        total: 45999.99
       },
       {
         productId: '2',
         productName: 'Wireless Mouse',
+        hsn: '8471',
         quantity: 1,
-        unitPrice: 24.99,
-        total: 24.99
+        unitPrice: 1299.99,
+        gstRate: 18,
+        gstAmount: 234.00,
+        total: 1299.99
       }
     ],
-    subtotal: 1024.98,
+    subtotal: 47299.98,
     discountPercent: 0,
     discountAmount: 0,
-    tax: 87.12,
-    total: 1112.10,
+    cgst: 4257.00,
+    sgst: 4257.00,
+    total: 55813.98,
     status: 'paid',
+    paymentMode: 'card',
     createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
     createdBy: {
       id: '1',
@@ -92,55 +121,72 @@ const initialInvoices: Invoice[] = [
   },
   {
     id: '2',
-    customerName: 'John Doe',
-    customerEmail: 'john@example.com',
+    invoiceNumber: 'INV-002',
+    customerName: 'Priya Patel',
+    customerEmail: 'priya@example.com',
+    customerMobile: '8765432109',
     items: [
       {
         productId: '3',
         productName: 'Monitor 24"',
+        hsn: '8528',
         quantity: 2,
-        unitPrice: 199.99,
-        total: 399.98
+        unitPrice: 9999.99,
+        gstRate: 18,
+        gstAmount: 3600.00,
+        total: 19999.98
       }
     ],
-    subtotal: 399.98,
+    subtotal: 19999.98,
     discountPercent: 10,
-    discountAmount: 40.00,
-    tax: 30.60,
-    total: 390.58,
+    discountAmount: 2000.00,
+    cgst: 1620.00,
+    sgst: 1620.00,
+    total: 21239.98,
     status: 'pending',
+    paymentMode: 'upi',
     createdAt: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
     createdBy: {
       id: '2',
-      name: 'Cashier User'
+      name: 'Staff User'
     }
   },
   {
     id: '3',
-    customerName: 'Alice Johnson',
-    customerEmail: 'alice@example.com',
+    invoiceNumber: 'INV-003',
+    customerName: 'Ananya Joshi',
+    customerEmail: 'ananya@example.com',
+    customerMobile: '7654321098',
     items: [
       {
         productId: '4',
         productName: 'Headphones',
+        hsn: '8518',
         quantity: 1,
-        unitPrice: 89.99,
-        total: 89.99
+        unitPrice: 4999.99,
+        gstRate: 18,
+        gstAmount: 900.00,
+        total: 4999.99
       },
       {
         productId: '5',
         productName: 'USB Cable',
+        hsn: '8544',
         quantity: 2,
-        unitPrice: 9.99,
-        total: 19.98
+        unitPrice: 499.99,
+        gstRate: 12,
+        gstAmount: 120.00,
+        total: 999.98
       }
     ],
-    subtotal: 109.97,
+    subtotal: 5999.97,
     discountPercent: 0,
     discountAmount: 0,
-    tax: 9.35,
-    total: 119.32,
+    cgst: 510.00,
+    sgst: 510.00,
+    total: 7019.97,
     status: 'paid',
+    paymentMode: 'cash',
     createdAt: new Date().toISOString(),
     createdBy: {
       id: '1',
@@ -183,29 +229,51 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const subtotal = items.reduce((sum, item) => sum + item.total, 0);
     const discountAmount = subtotal * (discountPercent / 100);
     const taxableAmount = subtotal - discountAmount;
-    const tax = taxableAmount * 0.085; // 8.5% tax rate
-    const total = taxableAmount + tax;
+    
+    // Calculate GST (assuming equal split between CGST and SGST)
+    const totalGst = items.reduce((sum, item) => sum + item.gstAmount, 0);
+    const cgst = totalGst / 2;
+    const sgst = totalGst / 2;
+    
+    const total = taxableAmount + totalGst;
     
     return {
       subtotal,
       discountAmount,
-      tax,
+      cgst,
+      sgst,
       total
     };
   };
   
-  const addInvoice = (invoice: Omit<Invoice, 'id' | 'createdAt'>) => {
+  const generateInvoiceNumber = () => {
+    const prefix = 'INV-';
+    const lastInvoice = invoices
+      .map(inv => {
+        if (inv.invoiceNumber && inv.invoiceNumber.startsWith(prefix)) {
+          const num = parseInt(inv.invoiceNumber.substring(prefix.length), 10);
+          return isNaN(num) ? 0 : num;
+        }
+        return 0;
+      })
+      .reduce((max, num) => Math.max(max, num), 0);
+    
+    return `${prefix}${String(lastInvoice + 1).padStart(3, '0')}`;
+  };
+  
+  const addInvoice = (invoice: Omit<Invoice, 'id' | 'createdAt' | 'invoiceNumber'>) => {
     const now = new Date().toISOString();
     const newInvoice: Invoice = {
       ...invoice,
       id: Math.random().toString(36).substr(2, 9),
+      invoiceNumber: generateInvoiceNumber(),
       createdAt: now
     };
     
     setInvoices([...invoices, newInvoice]);
     toast({
       title: "Invoice created",
-      description: `Invoice #${newInvoice.id} has been created`
+      description: `Invoice #${newInvoice.invoiceNumber} has been created`
     });
   };
   
@@ -218,16 +286,17 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     toast({
       title: "Invoice updated",
-      description: `Invoice #${id} has been updated`
+      description: `Invoice #${updatedFields.invoiceNumber || id} has been updated`
     });
   };
   
   const deleteInvoice = (id: string) => {
+    const invoice = invoices.find(inv => inv.id === id);
     setInvoices(invoices.filter(invoice => invoice.id !== id));
     
     toast({
       title: "Invoice deleted",
-      description: `Invoice #${id} has been deleted`
+      description: invoice ? `Invoice #${invoice.invoiceNumber} has been deleted` : "Invoice has been deleted"
     });
   };
   
@@ -249,6 +318,7 @@ export const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
       getInvoice,
       recentInvoices,
       calculateTotals,
+      formatIndianRupees,
       loading
     }}>
       {children}

@@ -8,7 +8,7 @@ export default function ProductAdd() {
       <div className="flex flex-col space-y-1.5 mb-6">
         <h2 className="text-3xl font-bold tracking-tight">Add Product</h2>
         <p className="text-muted-foreground">
-          Add a new product to your inventory
+          Add a new product to your inventory with GST details
         </p>
       </div>
       

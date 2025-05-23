@@ -6,12 +6,17 @@ export interface Product {
   id: string;
   name: string;
   sku: string;
-  price: number;
+  hsn: string;
+  mrp: number;
+  sellingPrice: number;
+  purchasePrice: number;
   quantity: number;
+  unit: string;
   category: string;
   description?: string;
   image?: string;
   lowStockThreshold: number;
+  gstRate: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,11 +47,16 @@ const initialProducts: Product[] = [
     id: '1',
     name: 'Laptop',
     sku: 'LPT-001',
-    price: 999.99,
+    hsn: '8471',
+    mrp: 49999.99,
+    sellingPrice: 45999.99,
+    purchasePrice: 40999.99,
     quantity: 15,
+    unit: 'Pcs',
     category: 'Electronics',
     description: 'High-performance laptop with 16GB RAM and 512GB SSD',
     lowStockThreshold: 5,
+    gstRate: 18,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -54,11 +64,16 @@ const initialProducts: Product[] = [
     id: '2',
     name: 'Wireless Mouse',
     sku: 'WMS-002',
-    price: 24.99,
+    hsn: '8471',
+    mrp: 1499.99,
+    sellingPrice: 1299.99,
+    purchasePrice: 899.99,
     quantity: 45,
+    unit: 'Pcs',
     category: 'Accessories',
     description: 'Ergonomic wireless mouse with long battery life',
     lowStockThreshold: 10,
+    gstRate: 18,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -66,11 +81,16 @@ const initialProducts: Product[] = [
     id: '3',
     name: 'Monitor 24"',
     sku: 'MNT-003',
-    price: 199.99,
+    hsn: '8528',
+    mrp: 12999.99,
+    sellingPrice: 9999.99,
+    purchasePrice: 7999.99,
     quantity: 8,
+    unit: 'Pcs',
     category: 'Electronics',
     description: '24-inch LED monitor with HDR support',
     lowStockThreshold: 3,
+    gstRate: 18,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -78,11 +98,16 @@ const initialProducts: Product[] = [
     id: '4',
     name: 'Headphones',
     sku: 'HPH-004',
-    price: 89.99,
+    hsn: '8518',
+    mrp: 5999.99,
+    sellingPrice: 4999.99,
+    purchasePrice: 3499.99,
     quantity: 2,
+    unit: 'Pcs',
     category: 'Audio',
     description: 'Noise-cancelling over-ear headphones',
     lowStockThreshold: 5,
+    gstRate: 18,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
@@ -90,11 +115,16 @@ const initialProducts: Product[] = [
     id: '5',
     name: 'USB Cable',
     sku: 'USB-005',
-    price: 9.99,
+    hsn: '8544',
+    mrp: 599.99,
+    sellingPrice: 499.99,
+    purchasePrice: 249.99,
     quantity: 100,
+    unit: 'Pcs',
     category: 'Cables',
     description: '6ft USB-C to USB-A cable',
     lowStockThreshold: 20,
+    gstRate: 12,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }

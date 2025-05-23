@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatIndianRupees } from "@/contexts/InvoiceContext";
 
 interface ProductDetailProps {
   productId: string;
@@ -41,7 +42,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -102,12 +103,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
                     <p>{product.sku}</p>
                   </div>
                   <div>
+                    <span className="text-sm font-medium text-gray-500">HSN Code:</span>
+                    <p>{product.hsn}</p>
+                  </div>
+                  <div>
                     <span className="text-sm font-medium text-gray-500">Category:</span>
                     <p>{product.category}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Price:</span>
-                    <p>${product.price.toFixed(2)}</p>
+                    <span className="text-sm font-medium text-gray-500">GST Rate:</span>
+                    <p>{product.gstRate}%</p>
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-500">Description:</span>
@@ -117,12 +122,24 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
               </div>
 
               <div>
-                <h3 className="font-semibold text-lg mb-4">Inventory Information</h3>
+                <h3 className="font-semibold text-lg mb-4">Pricing & Inventory</h3>
                 <div className="space-y-2">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">MRP:</span>
+                    <p>{formatIndianRupees(product.mrp)}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Selling Price:</span>
+                    <p>{formatIndianRupees(product.sellingPrice)}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Purchase Price:</span>
+                    <p>{formatIndianRupees(product.purchasePrice)}</p>
+                  </div>
                   <div>
                     <span className="text-sm font-medium text-gray-500">Quantity in Stock:</span>
                     <div className="flex items-center">
-                      <p>{product.quantity}</p>
+                      <p>{product.quantity} {product.unit}</p>
                       {product.quantity <= product.lowStockThreshold && (
                         <Badge variant="destructive" className="ml-2">Low Stock</Badge>
                       )}
@@ -130,7 +147,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-500">Low Stock Threshold:</span>
-                    <p>{product.lowStockThreshold} units</p>
+                    <p>{product.lowStockThreshold} {product.unit}</p>
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-500">Created At:</span>

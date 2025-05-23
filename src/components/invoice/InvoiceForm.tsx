@@ -17,12 +17,20 @@ import { Card } from "@/components/ui/card";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useInventory, Product } from "@/contexts/InventoryContext";
-import { useInvoices, InvoiceItem } from "@/contexts/InvoiceContext";
+import { useInvoices, InvoiceItem, formatIndianRupees } from "@/contexts/InvoiceContext";
+import { IndianRupee } from "lucide-react";
 
 interface ProductQuantity {
   productId: string;
   quantity: number;
 }
+
+const paymentModes = [
+  { value: "cash", label: "Cash" },
+  { value: "upi", label: "UPI" },
+  { value: "card", label: "Card" },
+  { value: "netbanking", label: "Net Banking" }
+];
 
 const InvoiceForm = () => {
   const { user } = useAuth();
@@ -32,8 +40,10 @@ const InvoiceForm = () => {
   
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerMobile, setCustomerMobile] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<"paid" | "pending">("pending");
+  const [paymentMode, setPaymentMode] = useState<string>("cash");
   const [discountPercent, setDiscountPercent] = useState(0);
   
   const [selectedProducts, setSelectedProducts] = useState<ProductQuantity[]>([]);
@@ -74,12 +84,18 @@ const InvoiceForm = () => {
       return;
     }
     
+    // Calculate GST amount
+    const gstAmount = (product.sellingPrice * updatedProducts[index].quantity * product.gstRate) / 100;
+    
     updatedItems[index] = {
       productId,
       productName: product.name,
+      hsn: product.hsn,
       quantity: updatedProducts[index].quantity,
-      unitPrice: product.price,
-      total: updatedProducts[index].quantity * product.price
+      unitPrice: product.sellingPrice,
+      gstRate: product.gstRate,
+      gstAmount: gstAmount,
+      total: updatedProducts[index].quantity * product.sellingPrice
     };
     
     setInvoiceItems(updatedItems);
@@ -107,9 +123,14 @@ const InvoiceForm = () => {
     
     // Update invoice items
     const updatedItems = [...invoiceItems];
+    
+    // Calculate GST amount
+    const gstAmount = (product.sellingPrice * quantity * product.gstRate) / 100;
+    
     updatedItems[index] = {
       ...updatedItems[index],
       quantity,
+      gstAmount,
       total: quantity * updatedItems[index].unitPrice
     };
     
@@ -150,6 +171,10 @@ const InvoiceForm = () => {
       newErrors.customerEmail = "Please enter a valid email address";
     }
     
+    if (customerMobile && !/^\d{10}$/.test(customerMobile)) {
+      newErrors.customerMobile = "Please enter a valid 10-digit mobile number";
+    }
+    
     if (selectedProducts.length === 0) {
       newErrors.products = "At least one product must be selected";
     }
@@ -187,19 +212,22 @@ const InvoiceForm = () => {
       total: item.quantity * item.unitPrice
     }));
     
-    const { subtotal, discountAmount, tax, total } = calculateTotals(items, discountPercent);
+    const { subtotal, discountAmount, cgst, sgst, total } = calculateTotals(items, discountPercent);
     
     // Create new invoice
     const invoice = {
       customerName,
       customerEmail,
+      customerMobile,
       items,
       subtotal,
       discountPercent,
       discountAmount,
-      tax,
+      cgst,
+      sgst,
       total,
       status,
+      paymentMode,
       notes,
       createdBy: {
         id: user?.id || '',
@@ -227,19 +255,31 @@ const InvoiceForm = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="customerName">Customer Name</Label>
+          <Label htmlFor="customerName">Buyer Name</Label>
           <Input
             id="customerName"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
-            placeholder="Enter customer name"
+            placeholder="Enter buyer name"
             className={errors.customerName ? "border-red-500" : ""}
           />
           {errors.customerName && <p className="text-sm text-red-500">{errors.customerName}</p>}
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="customerEmail">Customer Email</Label>
+          <Label htmlFor="customerMobile">Mobile Number</Label>
+          <Input
+            id="customerMobile"
+            value={customerMobile}
+            onChange={(e) => setCustomerMobile(e.target.value)}
+            placeholder="Enter mobile number"
+            className={errors.customerMobile ? "border-red-500" : ""}
+          />
+          {errors.customerMobile && <p className="text-sm text-red-500">{errors.customerMobile}</p>}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="customerEmail">Email</Label>
           <Input
             id="customerEmail"
             type="email"
@@ -251,19 +291,39 @@ const InvoiceForm = () => {
           {errors.customerEmail && <p className="text-sm text-red-500">{errors.customerEmail}</p>}
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <Select value={status} onValueChange={(value: "paid" | "pending") => setStatus(value)}>
-            <SelectTrigger id="status">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select value={status} onValueChange={(value: "paid" | "pending") => setStatus(value)}>
+              <SelectTrigger id="status">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="paymentMode">Payment Mode</Label>
+            <Select value={paymentMode} onValueChange={(value) => setPaymentMode(value)}>
+              <SelectTrigger id="paymentMode">
+                <SelectValue placeholder="Select payment mode" />
+              </SelectTrigger>
+              <SelectContent>
+                {paymentModes.map((mode) => (
+                  <SelectItem key={mode.value} value={mode.value}>
+                    {mode.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="discount">Discount (%)</Label>
           <Input
@@ -297,7 +357,9 @@ const InvoiceForm = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Product</TableHead>
+                <TableHead>HSN</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>GST</TableHead>
                 <TableHead>Quantity</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead></TableHead>
@@ -306,7 +368,7 @@ const InvoiceForm = () => {
             <TableBody>
               {selectedProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={7} className="text-center py-4">
                     No products selected
                   </TableCell>
                 </TableRow>
@@ -340,7 +402,13 @@ const InvoiceForm = () => {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        ${product ? product.price.toFixed(2) : "0.00"}
+                        {product?.hsn || "-"}
+                      </TableCell>
+                      <TableCell>
+                        {product ? formatIndianRupees(product.sellingPrice) : "₹0.00"}
+                      </TableCell>
+                      <TableCell>
+                        {product ? `${product.gstRate}%` : "0%"}
                       </TableCell>
                       <TableCell>
                         <Input
@@ -356,7 +424,7 @@ const InvoiceForm = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        ${invoiceItems[index]?.total?.toFixed(2) || "0.00"}
+                        {invoiceItems[index]?.total ? formatIndianRupees(invoiceItems[index].total) : "₹0.00"}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -393,21 +461,25 @@ const InvoiceForm = () => {
         <div className="space-y-1">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>${totals.subtotal.toFixed(2)}</span>
+            <span>{formatIndianRupees(totals.subtotal)}</span>
           </div>
           {discountPercent > 0 && (
             <div className="flex justify-between">
               <span>Discount ({discountPercent}%):</span>
-              <span>-${totals.discountAmount.toFixed(2)}</span>
+              <span>-{formatIndianRupees(totals.discountAmount)}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span>Tax (8.5%):</span>
-            <span>${totals.tax.toFixed(2)}</span>
+            <span>CGST:</span>
+            <span>{formatIndianRupees(totals.cgst)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>SGST:</span>
+            <span>{formatIndianRupees(totals.sgst)}</span>
           </div>
           <div className="flex justify-between font-bold text-lg">
             <span>Total:</span>
-            <span>${totals.total.toFixed(2)}</span>
+            <span>{formatIndianRupees(totals.total)}</span>
           </div>
         </div>
       </Card>

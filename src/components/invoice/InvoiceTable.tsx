@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useInvoices, Invoice } from "@/contexts/InvoiceContext";
+import { useInvoices, formatIndianRupees } from "@/contexts/InvoiceContext";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,7 @@ const InvoiceTable = () => {
     const matchesSearch = 
       invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      invoice.id.toLowerCase().includes(searchTerm.toLowerCase());
+      invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase());
       
     const matchesStatus = !filterStatus || invoice.status === filterStatus;
     
@@ -44,7 +44,7 @@ const InvoiceTable = () => {
   };
   
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-IN');
   };
   
   const handleDelete = (id: string) => {
@@ -103,8 +103,8 @@ const InvoiceTable = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice ID</TableHead>
-              <TableHead>Customer</TableHead>
+              <TableHead>Invoice No.</TableHead>
+              <TableHead>Buyer Name</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
@@ -120,17 +120,17 @@ const InvoiceTable = () => {
                       to={`/invoices/${invoice.id}`}
                       className="font-medium hover:underline"
                     >
-                      #{invoice.id}
+                      {invoice.invoiceNumber}
                     </Link>
                   </TableCell>
                   <TableCell>
                     <div>
                       <p>{invoice.customerName}</p>
-                      <p className="text-sm text-gray-500">{invoice.customerEmail}</p>
+                      <p className="text-sm text-gray-500">{invoice.customerMobile || invoice.customerEmail}</p>
                     </div>
                   </TableCell>
                   <TableCell>{formatDate(invoice.createdAt)}</TableCell>
-                  <TableCell>${invoice.total.toFixed(2)}</TableCell>
+                  <TableCell>{formatIndianRupees(invoice.total)}</TableCell>
                   <TableCell>{getStatusBadge(invoice.status)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

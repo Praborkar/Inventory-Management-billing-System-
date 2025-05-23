@@ -11,7 +11,7 @@ export default function ProductView() {
       <div className="flex flex-col space-y-1.5 mb-6">
         <h2 className="text-3xl font-bold tracking-tight">Product Details</h2>
         <p className="text-muted-foreground">
-          View detailed information about this product
+          View detailed product information including GST rates
         </p>
       </div>
       
