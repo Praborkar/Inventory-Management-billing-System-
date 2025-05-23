@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -43,7 +42,7 @@ const InvoiceForm = () => {
   const [customerMobile, setCustomerMobile] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<"paid" | "pending">("pending");
-  const [paymentMode, setPaymentMode] = useState<string>("cash");
+  const [paymentMode, setPaymentMode] = useState<"cash" | "upi" | "card" | "netbanking">("cash");
   const [discountPercent, setDiscountPercent] = useState(0);
   
   const [selectedProducts, setSelectedProducts] = useState<ProductQuantity[]>([]);
@@ -227,7 +226,7 @@ const InvoiceForm = () => {
       sgst,
       total,
       status,
-      paymentMode,
+      paymentMode, // This is now properly typed
       notes,
       createdBy: {
         id: user?.id || '',

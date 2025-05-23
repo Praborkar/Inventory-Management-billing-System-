@@ -87,7 +87,10 @@ export default function Reports() {
   
   // Format tooltip values in Indian currency
   const formatTooltipCurrency = (value: any) => {
-    return formatIndianRupees(value);
+    if (typeof value === 'number') {
+      return formatIndianRupees(value);
+    }
+    return value;
   };
   
   // Colors for pie chart
@@ -119,11 +122,19 @@ export default function Reports() {
                   <XAxis dataKey="name" />
                   <YAxis 
                     yAxisId="left" 
-                    tickFormatter={(value) => `₹${formatIndianNumber(value)}`}
+                    tickFormatter={(value) => {
+                      if (typeof value === 'number') {
+                        return `₹${formatIndianNumber(value)}`;
+                      }
+                      return value;
+                    }}
                   />
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip formatter={(value, name) => {
-                    return name === 'sales' ? [formatIndianRupees(value), 'Sales'] : [value, 'Invoices'];
+                    if (name === 'sales' && typeof value === 'number') {
+                      return [formatIndianRupees(value), 'Sales'];
+                    }
+                    return [value, 'Invoices'];
                   }} />
                   <Legend />
                   <Line 
@@ -175,7 +186,12 @@ export default function Reports() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value} units`, 'Quantity']} />
+                  <Tooltip formatter={(value) => {
+                    if (typeof value === 'number') {
+                      return [`${value} units`, 'Quantity'];
+                    }
+                    return [value, 'Quantity'];
+                  }} />
                   <Legend layout="vertical" align="right" verticalAlign="middle" />
                 </PieChart>
               </ResponsiveContainer>
@@ -197,8 +213,18 @@ export default function Reports() {
                 <BarChart data={salesByCategoryData()} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `₹${formatIndianNumber(value)}`} />
-                  <Tooltip formatter={(value) => [formatIndianRupees(value), 'Revenue']} />
+                  <YAxis tickFormatter={(value) => {
+                    if (typeof value === 'number') {
+                      return `₹${formatIndianNumber(value)}`;
+                    }
+                    return value;
+                  }} />
+                  <Tooltip formatter={(value) => {
+                    if (typeof value === 'number') {
+                      return [formatIndianRupees(value), 'Revenue'];
+                    }
+                    return [value, 'Revenue'];
+                  }} />
                   <Bar dataKey="value" fill="#3b82f6" name="Revenue" />
                 </BarChart>
               </ResponsiveContainer>
