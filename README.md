@@ -1,73 +1,40 @@
-# Welcome to your Lovable project
+# 🧾 Inventory Management & Billing System
 
-## Project info
+An intuitive and fully-functional inventory and billing system designed to automate inventory tracking, streamline billing processes, and improve business insights for small to medium-sized businesses like retailers, wholesalers, and service centers.
 
-**URL**: https://lovable.dev/projects/233ef073-60a5-4c7e-82f3-278b47958896
+---
 
-## How can I edit this code?
+## 🛠️ Project Specifications
 
-There are several ways of editing your application.
+### ✅ Core Functionalities
 
-**Use Lovable**
+| Module               | Description                                                                 |
+|----------------------|-----------------------------------------------------------------------------|
+| Product Management   | Add, update, delete products; manage stock levels and pricing               |
+| Inventory Control    | Real-time stock tracking; quantity adjustments based on sales/purchase      |
+| Billing/Invoicing    | Generate GST-ready printable invoices with automatic calculations           |
+| Supplier Management  | Maintain vendor/supplier details for product sourcing                       |
+| Customer Management  | Store and retrieve customer details for fast checkout and history tracking  |
+| User Authentication  | Role-based login system (admin, cashier) with session handling              |
+| Reports & Analytics  | View sales history, daily/monthly reports, low-stock alerts, and top items  |
+| Print & Export       | Export invoices to PDF and print them directly                              |
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/233ef073-60a5-4c7e-82f3-278b47958896) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🧑‍💻 Technologies Used
 
-**Use your preferred IDE**
+| Layer          | Language/Tool        | Use Case / Role                                                                 |
+|----------------|----------------------|----------------------------------------------------------------------------------|
+| Frontend       | HTML5                | Structure the web pages and forms                                               |
+|                | CSS3 + Bootstrap     | Styling and responsive design                                                   |
+|                | JavaScript (ES6)     | Input validation, UI interactions, dynamic data rendering                       |
+| Backend        | PHP                  | Core application logic, server-side routing, session & role management          |
+|                | SQL (MySQL)          | Database schema to store product, user, invoice, and transaction data           |
+| Server Stack   | Apache               | Web server to host and run PHP files                                            |
+|                | XAMPP                | Local development environment with Apache, MySQL, PHP                           |
+| Version Control| Git + GitHub         | Code management, versioning, and collaboration                                  |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📂 Project Structure
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/233ef073-60a5-4c7e-82f3-278b47958896) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
